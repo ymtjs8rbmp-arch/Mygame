@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#10251d">
+<title>Wildwood Survival 3D</title>
+<style>
+:root{color-scheme:dark;--panel:rgba(8,19,18,.82);--line:rgba(210,240,220,.2);--mint:#b9f4c9;--gold:#ffdb8a}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b24;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f4fff6;touch-action:none;overscroll-behavior:none}canvas{display:block;width:100%;height:100%;touch-action:none}
+#loading{position:fixed;inset:0;display:none;place-items:center;background:linear-gradient(#183b32,#10251d);z-index:20;font-weight:800;letter-spacing:.08em}
+#hud{position:fixed;inset:0;pointer-events:none;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;backdrop-filter:blur(9px);box-shadow:0 8px 24px #0003}
+#status{position:absolute;top:calc(12px + env(safe-area-inset-top));left:12px;padding:10px 12px;width:min(260px,66vw);font-size:12px}
+.row{display:flex;align-items:center;gap:8px}.statname{width:58px;color:#d3e5d8}.track{height:8px;flex:1;background:#253d33;border-radius:20px;overflow:hidden}.fill{height:100%;border-radius:20px;transition:width .15s}.health{background:#ff7777}.food{background:#ffca6a}.water{background:#75c9ff}
+#objective{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;padding:10px 12px;max-width:42vw;text-align:right;font-size:12px}
+#objective strong{display:block;color:var(--mint);font-size:13px;margin-bottom:3px}
+#toast{position:absolute;top:24%;left:50%;transform:translate(-50%,-50%);padding:10px 15px;max-width:86vw;text-align:center;font-weight:700;font-size:13px;opacity:0;transition:opacity .2s}
+#toast.show{opacity:1}
+#help{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;font-size:11px;color:#d7e9dc;white-space:nowrap}
+#mobile{position:fixed;inset:0;pointer-events:none}
+#stick{position:absolute;left:22px;bottom:calc(28px + env(safe-area-inset-bottom));width:116px;height:116px;border-radius:50%;background:#d9ffe51c;border:1px solid #d9ffe55c;pointer-events:auto;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:48px;height:48px;transform:translate(-50%,-50%);border-radius:50%;background:#d9ffe5b5;border:2px solid #fff9;box-shadow:0 3px 12px #0004}
+.action{position:absolute;pointer-events:auto;touch-action:manipulation;border:1px solid #eaffed6b;background:#102a20d9;color:#fff;font-weight:800;border-radius:50%;width:64px;height:64px;box-shadow:0 5px 18px #0004}
+#use{right:24px;bottom:calc(46px + env(safe-area-inset-bottom));width:76px;height:76px;background:#a9e9b9e8;color:#10251d}
+#eat{right:100px;bottom:calc(112px + env(safe-area-inset-bottom));width:54px;height:54px;font-size:11px}
+#craft{right:28px;bottom:calc(138px + env(safe-area-inset-bottom));width:54px;height:54px;font-size:11px}
+#pause{position:absolute;right:12px;top:calc(88px + env(safe-area-inset-top));pointer-events:auto;border:1px solid var(--line);border-radius:10px;padding:8px 11px;background:var(--panel);color:white;font-weight:700}
+#overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:20px;background:#06120fd9}
+#card{width:min(520px,100%);padding:24px;border-radius:22px;background:linear-gradient(150deg,#1b3a30,#10231d);border:1px solid #a8d8b34f;box-shadow:0 20px 80px #0007}
+#card h1{margin:0 0 8px;font-size:clamp(27px,7vw,42px);line-height:1.02;letter-spacing:-.04em}
+#card p{color:#d0e2d5;line-height:1.55;font-size:14px}
+#card ul{padding-left:20px;color:#d0e2d5;font-size:13px;line-height:1.8}
+.primary{border:0;border-radius:13px;background:var(--mint);color:#10251d;font-size:15px;font-weight:900;padding:14px 18px;width:100%;margin-top:8px}
+.small{font-size:11px!important;color:#9fb8a7!important}
+#craftMenu{position:fixed;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);width:min(330px,90vw);padding:16px;display:none;pointer-events:auto}
+#craftMenu h3{margin:0 0 8px}#craftMenu button{display:block;width:100%;padding:11px;margin-top:7px;border:1px solid var(--line);border-radius:10px;background:#1b3a30;color:white;text-align:left}
+@media(min-width:800px){#stick,#use,#eat,#craft{display:none}#help{bottom:16px}#status{width:270px}#objective{max-width:260px}}
+</style>
+</head>
+<body>
+<div id="loading">GROWING THE WILDERNESS…</div>
+<div id="hud">
+ <div id="status" class="panel">
+  <div class="row" style="justify-content:space-between;margin-bottom:7px"><strong>🧭 SURVIVOR</strong><span id="day">DAY 1 · 08:00</span></div>
+  <div class="row"><span class="statname">Health</span><div class="track"><div id="health" class="fill health" style="width:100%"></div></div><span id="healthN">100</span></div>
+  <div class="row" style="margin-top:6px"><span class="statname">Hunger</span><div class="track"><div id="hunger" class="fill food" style="width:100%"></div></div><span id="hungerN">100</span></div>
+  <div class="row" style="margin-top:6px"><span class="statname">Thirst</span><div class="track"><div id="thirst" class="fill water" style="width:100%"></div></div><span id="thirstN">100</span></div>
+  <div style="margin-top:8px;color:#d4e6d9">🪵 <span id="woodN">0</span> Wood &nbsp; 🪨 <span id="stoneN">0</span> Stone &nbsp; 🍓 <span id="berryN">0</span> Berries</div>
+ </div>
+ <div id="objective" class="panel"><strong>YOUR FIRST DAY</strong><span id="goal">Gather 3 wood and 2 stone.</span><div style="margin-top:6px;color:#b5cdbb">Find glowing resources nearby.</div></div>
+ <div id="toast" class="panel"></div>
+ <div id="help" class="panel">WASD move · Drag to look · E gather · Shift sprint</div>
+</div>
+<div id="mobile">
+ <div id="stick"><div id="knob"></div></div>
+ <button id="use" class="action">GATHER</button>
+ <button id="eat" class="action">EAT 🍓</button>
+ <button id="craft" class="action">CRAFT</button>
+</div>
+<button id="pause">Ⅱ</button>
+<div id="craftMenu" class="panel"><h3>🛠️ Survival crafting</h3><button data-recipe="campfire">🔥 Campfire — 3 wood + 2 stone</button><button data-recipe="shelter">⛺ Leaf shelter — 5 wood</button><button data-recipe="close">Close</button></div>
+<div id="overlay"><div id="card">
+ <div style="font-size:12px;letter-spacing:.18em;color:#b9f4c9;font-weight:900;margin-bottom:12px">A LITTLE WILDWOOD GAME</div>
+ <h1>WILDWOOD<br>SURVIVAL 3D</h1>
+ <p>You woke up in a quiet forest. Gather supplies, keep your hunger and thirst up, and build a camp before nightfall.</p>
+ <ul><li>Explore the forest and gather wood, stone, and berries.</li><li>Craft a campfire or shelter to survive longer.</li><li>Watch your health, hunger, and thirst.</li></ul>
+ <button class="primary" id="start">ENTER THE WILDERNESS</button>
+ <p class="small">Single-player prototype · Progress resets when you refresh.</p>
+</div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const $=id=>document.getElementById(id);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x9bc9d0);scene.fog=new THREE.Fog(0x9bc9d0,24,90);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xe4fff2,0x52644a,2.0));
+const sun=new THREE.DirectionalLight(0xffefcf,2.1);sun.position.set(-22,35,18);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-35;sun.shadow.camera.right=35;sun.shadow.camera.top=35;sun.shadow.camera.bottom=-35;scene.add(sun);
+const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
+const groundMat=mat(0x4e8050), trunkMat=mat(0x6e4c32), leafMat=mat(0x2d6b48), leaf2=mat(0x468552), rockMat=mat(0x7e8c8a), berryMat=mat(0xb52e5b), woodMat=mat(0xb88a51);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(220,220),groundMat);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const grid=new THREE.GridHelper(220,55,0x527c4e,0x527c4e);grid.position.y=.012;grid.material.transparent=true;grid.material.opacity=.15;scene.add(grid);
+function seeded(n){return ()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296}}const rand=seeded(43);
+const resources=[];const colliders=[];
+function tree(x,z,scale=1){
+ const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);
+ const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.23,.34,2.2,7),trunkMat);trunk.position.y=1.1;trunk.castShadow=true;trunk.receiveShadow=true;g.add(trunk);
+ for(let i=0;i<3;i++){const crown=new THREE.Mesh(new THREE.ConeGeometry(1.25-i*.18,2.1,7),i===1?leaf2:leafMat);crown.position.y=2.2+i*.7;crown.castShadow=true;crown.receiveShadow=true;g.add(crown)}
+ scene.add(g);colliders.push({x,z,r:.7*scale});resources.push({type:'wood',x,z,obj:g,amount:3,rad:1.45*scale});
+}
+function rock(x,z){const m=new THREE.Mesh(new THREE.DodecahedronGeometry(.55+rand()*.35,0),rockMat);m.position.set(x,.42,z);m.scale.set(1,0.8,.85);m.rotation.set(rand(),rand()*3,rand());m.castShadow=true;m.receiveShadow=true;scene.add(m);resources.push({type:'stone',x,z,obj:m,amount:2,rad:1.2});}
+function berry(x,z){const g=new THREE.Group();g.position.set(x,0,z);for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.13,7,6),berryMat);b.position.set(Math.cos(i*1.3)*.35,.4+(i%2)*.12,Math.sin(i*1.3)*.3);g.add(b)}const bush=new THREE.Mesh(new THREE.IcosahedronGeometry(.45,1),leaf2);bush.position.y=.35;g.add(bush);scene.add(g);resources.push({type:'berry',x,z,obj:g,amount:3,rad:1.15});}
+for(let i=0;i<125;i++){let x=(rand()-.5)*100,z=(rand()-.5)*100;if(Math.hypot(x,z)<7)continue;const r=rand();if(r<.57)tree(x,z,.7+rand()*.55);else if(r<.82)rock(x,z);else berry(x,z);}
+for(let i=0;i<70;i++){const x=(rand()-.5)*100,z=(rand()-.5)*100;const m=new THREE.Mesh(new THREE.ConeGeometry(.18+rand()*.25,.35,5),mat(i%2?0x71935b:0x8aa66a));m.position.set(x,.16,z);m.rotation.z=(rand()-.5)*.7;scene.add(m)}
+// Player
+const player=new THREE.Group();scene.add(player);
+const skin=mat(0xf1c49b), shirt=mat(0x426d8d), pants=mat(0x26384d), hair=mat(0x4a3026), boot=mat(0x2b241f);
+function capsule(radius,length,material,x,y,z){const m=new THREE.Mesh(new THREE.CapsuleGeometry(radius,length,4,8),material);m.position.set(x,y,z);m.castShadow=true;player.add(m);return m}
+const body=capsule(.35,.5,shirt,0,1.05,0);const head=new THREE.Mesh(new THREE.SphereGeometry(.27,12,10),skin);head.position.set(0,1.82,0);head.castShadow=true;player.add(head);const hairm=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8,0,Math.PI*2,0,Math.PI*.55),hair);hairm.position.set(0,1.9,-.015);player.add(hairm);
+const legL=capsule(.13,.42,pants,-.17,.48,0),legR=capsule(.13,.42,pants,.17,.48,0);const armL=capsule(.12,.42,skin,-.43,1.1,0),armR=capsule(.12,.42,skin,.43,1.1,0);
+player.position.set(0,0,0);
+const state={health:100,hunger:100,thirst:100,wood:0,stone:0,berries:0,day:1,time:8,alive:true,started:false,paused:false,buildings:[]};
+let yaw=0,pitch=.25,moveX=0,moveY=0,last=performance.now(),toastTimer=0,daySeconds=0;
+function say(s){$('toast').textContent=s;$('toast').classList.add('show');toastTimer=2.4}
+function updateUI(){
+ for(const k of ['health','hunger','thirst']){$(k).style.width=state[k]+'%';$(k+'N').textContent=Math.ceil(state[k])}
+ $('woodN').textContent=state.wood;$('stoneN').textContent=state.stone;$('berryN').textContent=state.berries;
+ $('day').textContent=`DAY ${state.day} · ${String(Math.floor(state.time)).padStart(2,'0')}:${String(Math.floor((state.time%1)*60)).padStart(2,'0')}`;
+ if(state.wood>=3&&state.stone>=2){$('goal').textContent='Craft a campfire or shelter (CRAFT).';$('objective').querySelector('strong').textContent='YOU’RE GETTING THERE'}
+ else {$('goal').textContent=`Gather ${Math.max(0,3-state.wood)} wood and ${Math.max(0,2-state.stone)} stone.`;$('objective').querySelector('strong').textContent='YOUR FIRST DAY'}
+}
+function gather(){
+ if(!state.alive||state.paused)return;
+ let best=null,dist=Infinity;
+ for(const r of resources){if(!r.obj.visible)continue;const d=Math.hypot(player.position.x-r.x,player.position.z-r.z);if(d<r.rad&&d<dist){best=r;dist=d}}
+ if(!best){say('Move closer to a tree, rock, or berry bush.');return}
+ if(best.type==='wood'){state.wood+=best.amount; say(`+${best.amount} wood!`)}
+ if(best.type==='stone'){state.stone+=best.amount;say(`+${best.amount} stone!`)}
+ if(best.type==='berry'){state.berries+=best.amount;say(`+${best.amount} berries! Tap EAT to snack.`)}
+ best.obj.visible=false;updateUI();
+}
+function eat(){if(!state.alive)return;if(state.berries>0){state.berries--;state.hunger=Math.min(100,state.hunger+22);state.thirst=Math.min(100,state.thirst+4);say('Yum. Hunger restored.')}else say('Find a berry bush first!');updateUI()}
+function craft(){if(!state.alive)return;$('craftMenu').style.display='block';}
+function make(recipe){
+ if(recipe==='close'){$('craftMenu').style.display='none';return}
+ if(recipe==='campfire'){if(state.wood<3||state.stone<2){say('Need 3 wood and 2 stone.');return}state.wood-=3;state.stone-=2;const g=new THREE.Group();g.position.copy(player.position);g.position.x+=Math.sin(yaw)*1.6;g.position.z-=Math.cos(yaw)*1.6;const base=new THREE.Mesh(new THREE.CylinderGeometry(.65,.75,.15,8),rockMat);base.position.y=.1;g.add(base);for(let i=0;i<3;i++){const log=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.85,6),woodMat);log.rotation.z=Math.PI/2;log.rotation.y=i*1.05;log.position.y=.25;g.add(log)}const flame=new THREE.Mesh(new THREE.ConeGeometry(.24,.7,7),new THREE.MeshBasicMaterial({color:0xffa333}));flame.position.y=.65;g.add(flame);scene.add(g);state.buildings.push({type:'campfire',obj:g});say('Campfire built! It will help you through the night.')}
+ if(recipe==='shelter'){if(state.wood<5){say('Need 5 wood.');return}state.wood-=5;const g=new THREE.Group();g.position.copy(player.position);g.position.x+=Math.sin(yaw)*1.8;g.position.z-=Math.cos(yaw)*1.8;const roof=new THREE.Mesh(new THREE.ConeGeometry(1.25,1.7,4),leafMat);roof.position.y=.85;roof.rotation.y=Math.PI/4;roof.scale.z=1.3;roof.castShadow=true;g.add(roof);scene.add(g);state.buildings.push({type:'shelter',obj:g});say('Shelter built! A safe little spot.')}
+ $('craftMenu').style.display='none';updateUI();
+}
+document.querySelectorAll('[data-recipe]').forEach(b=>b.addEventListener('click',()=>make(b.dataset.recipe)));
+$('use').addEventListener('pointerdown',e=>{e.preventDefault();gather()});$('eat').addEventListener('pointerdown',e=>{e.preventDefault();eat()});$('craft').addEventListener('pointerdown',e=>{e.preventDefault();craft()});
+const keys={};addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='KeyE')gather();if(e.code==='KeyF')eat();if(e.code==='KeyC')craft();if(e.code==='Escape')togglePause()},{passive:false});addEventListener('keyup',e=>keys[e.code]=false);
+function togglePause(){if(!state.started)return;state.paused=!state.paused;$('overlay').style.display=state.paused?'flex':'none';$('card').innerHTML=state.paused?'<h1>PAUSED</h1><p>Catch your breath, survivor.</p><button class="primary" id="resume">BACK TO THE WILD</button>':'<h1>WILDWOOD SURVIVAL 3D</h1><button class="primary" id="start">ENTER THE WILDERNESS</button>';if(state.paused)$('resume').onclick=togglePause;else $('start').onclick=startGame;}
+$('pause').addEventListener('click',togglePause);
+function startGame(){state.started=true;state.paused=false;$('overlay').style.display='none';$('loading').style.display='none';last=performance.now();say('Welcome! Look around and gather supplies.')}
+$('start').addEventListener('click',startGame);
+// Touch joystick and right-side drag camera
+const stick=$('stick'),knob=$('knob');let stickId=null,lookId=null,lastLookX=0,lastLookY=0;
+stick.addEventListener('pointerdown',e=>{e.preventDefault();stickId=e.pointerId;stick.setPointerCapture(e.pointerId);joystick(e)});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId){e.preventDefault();joystick(e)}});function joystick(e){const r=stick.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),len=Math.hypot(dx,dy),max=36,s=Math.min(1,max/(len||1));moveX=dx*s/max;moveY=dy*s/max;knob.style.left=`calc(50% + ${dx*s}px)`;knob.style.top=`calc(50% + ${dy*s}px)`}
+function releaseStick(e){if(e.pointerId===stickId){stickId=null;moveX=moveY=0;knob.style.left='50%';knob.style.top='50%'}}stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);
+renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'){lookId=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)}else if(e.button===0){lookId=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY}});renderer.domElement.addEventListener('pointermove',e=>{if(lookId===e.pointerId){const dx=e.clientX-lastLookX,dy=e.clientY-lastLookY;yaw-=dx*.006;pitch=Math.max(-.1,Math.min(.8,pitch+dy*.004));lastLookX=e.clientX;lastLookY=e.clientY}});function endLook(e){if(e.pointerId===lookId)lookId=null}renderer.domElement.addEventListener('pointerup',endLook);renderer.domElement.addEventListener('pointercancel',endLook);
+let isDragging=false; // Prevent accidental browser gestures
+document.addEventListener('contextmenu',e=>e.preventDefault());
+function animate(now){
+ requestAnimationFrame(animate);const dt=Math.min(.04,(now-last)/1000);last=now;
+ if(state.started&&state.alive&&!state.paused){
+  daySeconds+=dt;state.time+=dt*.22;if(state.time>=24){state.time-=24;state.day++;say('A new day begins. Keep going!')}
+  state.hunger=Math.max(0,state.hunger-dt*.42);state.thirst=Math.max(0,state.thirst-dt*.68);
+  if(state.hunger===0||state.thirst===0)state.health=Math.max(0,state.health-dt*(state.hunger===0&&state.thirst===0?2:1));
+  if(state.time>=18.5||state.time<5.5){scene.background.set(0x182b3b);scene.fog.color.set(0x182b3b);sun.intensity=.45}else{scene.background.set(0x9bc9d0);scene.fog.color.set(0x9bc9d0);sun.intensity=2.1}
+  const f=(keys.KeyW||keys.ArrowUp?-1:0)+(keys.KeyS||keys.ArrowDown?1:0)-moveY;
+  const s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+moveX;
+  const mag=Math.hypot(f,s);if(mag>.05){const speed=(keys.ShiftLeft||keys.ShiftRight)?7.2:4.5,fx=Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=Math.sin(yaw);const vx=(fx*f+rx*s)/mag*speed*dt,vz=(fz*f+rz*s)/mag*speed*dt;const nx=player.position.x+vx,nz=player.position.z+vz;let blocked=false;for(const c of colliders)if(Math.hypot(nx-c.x,nz-c.z)<c.r){blocked=true;break}if(!blocked){player.position.x=nx;player.position.z=nz}player.rotation.y=yaw+Math.atan2(s,-f);legL.rotation.x=Math.sin(now*.012)*.65;legR.rotation.x=-legL.rotation.x;armL.rotation.x=-legL.rotation.x*.7;armR.rotation.x=-armL.rotation.x}
+  if(state.health<=0){state.alive=false;$('overlay').style.display='flex';$('card').innerHTML='<div style="font-size:12px;letter-spacing:.15em;color:#b9f4c9;font-weight:900">THE FOREST WILL WAIT</div><h1>YOU FAINTED</h1><p>You survived until Day '+state.day+'. Try gathering berries sooner and keep an eye on thirst.</p><button class="primary" id="restart">TRY AGAIN</button>';$('restart').onclick=()=>location.reload()}
+  updateUI();if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('toast').classList.remove('show')}
+ }
+ const target=new THREE.Vector3(player.position.x,1.15,player.position.z);const dist=6.8;camera.position.set(target.x+Math.sin(yaw)*Math.cos(pitch)*dist,target.y+2.0+Math.sin(pitch)*dist,target.z+Math.cos(yaw)*Math.cos(pitch)*dist);camera.lookAt(target);
+ renderer.render(scene,camera);
+}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight)});
+requestAnimationFrame(animate);
+</script>
+</body></html>
