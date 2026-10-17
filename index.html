@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#65d9ff">
+<title>Esther's Puppy Adventure</title>
+<style>
+:root{--sky:#68d8ff;--blue:#168de7;--deep:#184778;--pink:#ff72b5;--yellow:#ffdc4d;--purple:#8b63ef;--green:#43ca65}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;font-family:"Trebuchet MS",system-ui,sans-serif;color:var(--deep);background:#69d8ff}
+body{user-select:none}
+button{font:900 clamp(14px,2.1vh,22px) "Trebuchet MS",system-ui,sans-serif;border:3px solid #fff;border-radius:18px;padding:clamp(9px,1.5vh,15px) clamp(13px,2vw,23px);color:#fff;background:linear-gradient(#49bcff,#1682e5);box-shadow:0 4px 0 #1263b9;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #1263b9}
+button:focus-visible{outline:4px solid #ffdc4d;outline-offset:3px}
+.yellow{color:#8a4b00;background:linear-gradient(#fff17c,#ffca31);box-shadow:0 4px #d79518}
+.pink{background:linear-gradient(#ffa1d2,#f2519d);box-shadow:0 4px #bc2d75}
+.purple{background:linear-gradient(#bca5ff,#8057e8);box-shadow:0 4px #5c3ab2}
+.green{background:linear-gradient(#85f17d,#2abd4e);box-shadow:0 4px #188b38}
+.white{background:#fff;color:var(--deep);box-shadow:0 4px #b6ddff}
+.small{font-size:14px;padding:8px 12px}
+#app{height:100dvh;width:100vw;position:relative;overflow:hidden;background:linear-gradient(#63d5ff 0%,#b9f0ff 62%,#b9ed8d 62%,#80d76c 100%)}
+.skydecor{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.cloud{position:absolute;width:110px;height:27px;background:#fff;border-radius:99px;opacity:.9}
+.cloud:before,.cloud:after{content:"";position:absolute;bottom:5px;background:#fff;border-radius:50%}
+.cloud:before{width:43px;height:42px;left:18px}.cloud:after{width:55px;height:51px;left:47px}
+.cloud.c1{top:9%;left:7%}.cloud.c2{top:17%;right:9%;transform:scale(.8)}.cloud.c3{top:5%;left:52%;transform:scale(.6)}
+.hill{position:absolute;bottom:-9vh;width:70vw;height:24vh;border-radius:50% 50% 0 0;background:#8de477}
+.hill.h1{left:-18vw}.hill.h2{right:-15vw;background:#70d866;width:60vw;height:18vh}
+.topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,8px) clamp(8px,2vw,24px) 8px;z-index:3;gap:8px}
+.logo{font-size:clamp(18px,3.4vh,34px);font-weight:1000;color:white;text-shadow:0 3px #1179c9,2px 4px #1179c9;white-space:nowrap}
+.stats{display:flex;gap:7px}.stat{background:#fff;border:3px solid #d5f5ff;border-radius:30px;padding:6px 11px;font-weight:1000;font-size:clamp(12px,1.7vh,17px);box-shadow:0 3px #7fc8ef;white-space:nowrap}
+.screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:clamp(12px,3vw,34px);z-index:2}
+.screen.active{display:flex}
+.card{width:min(900px,100%);max-height:100%;overflow:auto;background:linear-gradient(145deg,#fff,#f2fbff);border:5px solid #fff;border-radius:clamp(20px,4vw,34px);box-shadow:0 8px #65c6ed,0 16px 38px #1765a333;padding:clamp(16px,3vw,30px)}
+.homecard{background:linear-gradient(#ffffffed,#f6fffff2);display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:10px;position:relative}
+h1{font-size:clamp(32px,7vh,72px);line-height:.95;color:#1687e8;text-shadow:0 3px #bcefff;margin:0 0 10px}
+h2{font-size:clamp(22px,4vh,38px);color:var(--purple);margin:0 0 12px}
+p{font-size:clamp(14px,2vh,19px);line-height:1.35;margin:8px 0 14px}
+.tagline{color:#fff;text-shadow:0 2px #167bd0;font-weight:1000;font-size:clamp(17px,2.7vh,27px)}
+.menu-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.menu-buttons button{min-height:54px}
+.puppy-stage{display:flex;align-items:center;justify-content:center;min-height:270px;position:relative}
+.bluey{position:relative;width:clamp(145px,25vw,245px);height:clamp(190px,32vh,310px);filter:drop-shadow(0 8px 0 #3b8bc3);transform:rotate(-3deg);animation:bounce 2.1s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+.bluey .ear{position:absolute;top:0;width:26%;height:31%;background:#1d4e9b;border:4px solid #173c70;border-radius:65% 30% 45% 30%;z-index:0}
+.bluey .ear.left{left:18%;transform:rotate(-12deg)}.bluey .ear.right{right:15%;transform:rotate(13deg)}
+.bluey .head{position:absolute;top:14%;left:10%;width:81%;height:46%;background:#36a8f4;border:4px solid #173c70;border-radius:48% 48% 42% 42%;z-index:2}
+.bluey .patch{position:absolute;top:17%;left:26%;width:34%;height:26%;background:#1b4a98;border-radius:50% 45% 55% 45%;transform:rotate(-15deg)}
+.bluey .muzzle{position:absolute;right:-2%;top:43%;width:45%;height:22%;background:#ffdf9a;border:4px solid #173c70;border-radius:50% 48% 54% 50%;z-index:4}
+.bluey .nose{position:absolute;right:-1%;top:47%;width:10%;height:7%;background:#18375c;border-radius:60%;z-index:5}
+.bluey .eye{position:absolute;top:31%;left:25%;width:15%;height:21%;background:white;border:3px solid #173c70;border-radius:50%;z-index:4}
+.bluey .eye:after{content:"";position:absolute;width:38%;height:47%;top:28%;left:39%;background:#14294b;border-radius:50%}
+.bluey .eye.two{left:47%;top:29%;width:14%;height:20%}
+.bluey .body{position:absolute;left:23%;bottom:8%;width:58%;height:43%;background:#36a8f4;border:4px solid #173c70;border-radius:45% 45% 32% 32%;z-index:1}
+.bluey .belly{position:absolute;left:37%;bottom:12%;width:31%;height:29%;background:#b8eaff;border-radius:50%;z-index:2}
+.bluey .leg{position:absolute;bottom:0;width:22%;height:20%;background:#36a8f4;border:4px solid #173c70;border-radius:40%;z-index:4}
+.bluey .leg.l{left:26%}.bluey .leg.r{right:20%}
+.bluey .arm{position:absolute;top:57%;width:29%;height:10%;background:#36a8f4;border:4px solid #173c70;border-radius:50%;z-index:3}
+.bluey .arm.l{left:4%;transform:rotate(-30deg)}.bluey .arm.r{right:0;transform:rotate(25deg)}
+.sparkle{position:absolute;font-size:clamp(22px,4vh,42px);animation:bounce 1.8s infinite}
+.sparkle.a{top:7%;right:4%}.sparkle.b{bottom:7%;left:0;animation-delay:.4s}
+.home-footer{grid-column:1/-1;text-align:center;color:#397da4;font-size:13px;font-weight:900;margin-top:4px}
+.close{position:absolute;right:12px;top:12px;width:42px;height:42px;border-radius:50%;padding:0;font-size:22px;z-index:4}
+.level-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.levelbtn{background:linear-gradient(#e9faff,#fff);color:var(--deep);border:3px solid #bde8ff;box-shadow:0 4px #9bd5f4;padding:14px 5px;min-height:82px}
+.levelbtn.current{border-color:#ffc72d;background:#fff8cc}.levelbtn:disabled{opacity:.45}
+.game-ui{position:absolute;inset:0;display:none;z-index:5;pointer-events:none}
+.game-ui.active{display:block}
+.game-top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;pointer-events:auto}
+.game-top button{padding:8px 12px}
+.game-bottom{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;pointer-events:auto}
+.pad{display:flex;gap:8px}.pad button{width:clamp(52px,8vw,76px);height:clamp(52px,8vw,76px);font-size:25px;padding:4px;border-radius:22px}
+#world{width:100%;height:100%;display:block;touch-action:none}
+.modal-layer{position:absolute;inset:0;z-index:10;background:#123e6c9c;display:none;align-items:center;justify-content:center;padding:14px}
+.modal-layer.active{display:flex}
+.modal{width:min(620px,100%);background:linear-gradient(145deg,#fff,#f4fbff);border:5px solid #fff;border-radius:28px;padding:clamp(18px,3vw,30px);text-align:center;box-shadow:0 8px #65c6ed;position:relative;max-height:92%;overflow:auto}
+.bigemoji{font-size:clamp(35px,7vh,65px);margin-bottom:4px}
+.answers{display:grid;grid-template-columns:1fr;gap:9px;margin:16px 0}
+.answer{background:#eaf7ff;color:var(--deep);border:3px solid #b8e5ff;box-shadow:0 3px #8dcdf1;text-align:left}
+.answer.good{background:#d8ffdc;border-color:#60d978}.answer.bad{background:#ffe0ef;border-color:#ff9ac7}
+.feedback{min-height:26px;font-weight:1000;color:#24a54b}
+.word-choices{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.word-choices button{min-width:76px}
+.loading{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:linear-gradient(#63d7ff,#c3f5ff 60%,#a5e985);padding:20px;transition:opacity .5s}
+.loading h1{color:white;text-shadow:0 4px #1582d2;font-size:clamp(36px,8vh,78px)}
+.loading .heart{font-size:clamp(48px,10vh,90px);animation:bounce 1.2s infinite}
+.progress{width:min(300px,70vw);height:14px;background:#ffffffaa;border:3px solid white;border-radius:99px;overflow:hidden;margin-top:16px}.progress span{display:block;height:100%;width:0;background:#ffc72d;border-radius:99px;animation:load 1.5s ease-out forwards}@keyframes load{to{width:100%}}
+.note{font-size:12px;color:#547b9d;font-weight:800}
+@media(max-width:650px){.homecard{grid-template-columns:1fr;text-align:center;gap:0;padding-top:48px}.puppy-stage{min-height:185px}.bluey{height:200px;width:160px}.menu-buttons{gap:9px}.home-footer{margin-top:8px}.level-buttons{grid-template-columns:repeat(2,1fr)}.card{padding:15px}.game-top{left:6px;right:6px}.game-top button{font-size:13px}.game-bottom{left:8px;right:8px}.pad{gap:5px}}
+</style>
+</head>
+<body>
+<div id="app">
+ <div class="skydecor"><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="hill h1"></div><div class="hill h2"></div></div>
+ <div class="topbar"><div class="logo">🌈 Esther's Puppy Adventure</div><div class="stats"><span class="stat">🪙 <b id="coinCount">0</b></span><span class="stat">⭐ <b id="levelCount">1</b></span></div></div>
+
+ <section id="home" class="screen active"><div class="card homecard">
+  <div><div class="tagline">A happy little adventure!</div><h1>Jump &<br>Learn!</h1><p>Collect shiny coins, answer fun little questions, and explore sunny worlds with Bluey.</p>
+   <div class="menu-buttons"><button class="yellow" onclick="beginLevel(1)">▶ PLAY</button><button class="purple" onclick="openScreen('levels')">🗺️ SELECT LEVEL</button><button class="pink" onclick="openScreen('custom')">🎨 CUSTOMIZE</button><button onclick="openScreen('shop')">🛍️ SHOP</button><button class="green" onclick="openWordDrop()">🔤 WORD DROP</button><button class="white" onclick="showHow()">❔ HOW TO PLAY</button></div>
+  </div>
+  <div class="puppy-stage"><span class="sparkle a">✨</span><span class="sparkle b">🌼</span><div class="bluey" aria-label="Bluey-style blue heeler"><div class="ear left"></div><div class="ear right"></div><div class="head"><div class="patch"></div><div class="eye"></div><div class="eye two"></div><div class="muzzle"></div><div class="nose"></div></div><div class="body"></div><div class="belly"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"></div><div class="leg r"></div></div></div>
+  <div class="home-footer">💗 Play • Learn • Grow • Made with love for Esther 💗</div>
+ </div></section>
+
+ <canvas id="world"></canvas>
+ <div id="gameUI" class="game-ui"><div class="game-top"><button class="white" onclick="openPause()">Ⅱ MENU</button><span class="stat">LEVEL <b id="inLevel">1</b> · 🪙 <b id="inCoins">0</b></span><button class="pink" aria-label="Exit game" onclick="exitGame()">✕</button></div><div class="game-bottom"><div class="pad"><button class="white" id="leftBtn">◀</button><button class="white" id="rightBtn">▶</button></div><button class="yellow" id="jumpBtn">⬆ JUMP</button></div></div>
+
+ <section id="levels" class="screen"><div class="card"><button class="close pink" onclick="openScreen('home')">✕</button><h2>🗺️ Pick your adventure</h2><p>Choose any level you've unlocked!</p><div id="levelButtons" class="level-buttons"></div><p><button class="white" onclick="openScreen('home')">⬅ Back to menu</button></p></div></section>
+ <section id="custom" class="screen"><div class="card"><button class="close pink" onclick="openScreen('home')">✕</button><h2>🎨 Dress up Bluey!</h2><p>Choose a fun accessory for your adventure.</p><div class="puppy-stage" style="min-height:180px"><div class="puppy" id="customPup">🐶</div></div><div class="level-buttons" id="looks"></div><p><button class="green" onclick="saveLook()">Save look ✓</button> <button class="white" onclick="openScreen('home')">Back</button></p></div></section>
+ <section id="shop" class="screen"><div class="card"><button class="close pink" onclick="openScreen('home')">✕</button><h2>🛍️ Coin Shop</h2><p>Use coins you find in the game to unlock accessories. No real money, ever!</p><div id="shopItems" class="level-buttons"></div><hr style="border:0;border-top:3px dotted #b8e5ff;margin:18px 0"><button class="purple" onclick="openCode()">🎁 Parent bonus code</button><p class="note">Bonus code gives pretend in-game coins only. No payment details are requested.</p></div></section>
+
+ <div id="modalLayer" class="modal-layer"><div class="modal" id="modalContent"></div></div>
+ <div id="loading" class="loading"><div class="heart">💗</div><h1>Love you Esther!</h1><p class="tagline">Your adventure is getting ready…</p><div class="progress"><span></span></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let coins=0,level=1,maxLevel=1,accessory='🐾',owned=new Set(['🐾']),gameActive=false,paused=false,questionStage='start',questionAnswered=false,keys={left:false,right:false},player={x:80,y:0,vy:0,onGround:false},collected=[],platforms=[],frame=0,raf=0,wordRound=0;
+const qs=[
+ {q:'Which number comes after 4?',a:['3','5','8'],ok:1,emoji:'🔢'},
+ {q:'Which one is a fruit?',a:['Apple 🍎','Sock 🧦','Chair 🪑'],ok:0,emoji:'🍎'},
+ {q:'How many sides does a triangle have?',a:['2','3','4'],ok:1,emoji:'🔺'},
+ {q:'Which letter starts the word SUN?',a:['S','B','M'],ok:0,emoji:'☀️'},
+ {q:'What is 2 + 3?',a:['4','5','6'],ok:1,emoji:'🧮'},
+ {q:'Which shape is round?',a:['Square ◼️','Circle 🔵','Triangle 🔺'],ok:1,emoji:'🔵'},
+ {q:'Which animal says “moo”?',a:['Cat 🐱','Cow 🐮','Duck 🦆'],ok:1,emoji:'🐮'},
+ {q:'What comes next: red, blue, red, …?',a:['Red ❤️','Green 💚','Yellow 💛'],ok:1,emoji:'🎨'}
+];
+function openScreen(id){closeModal();$('gameUI').classList.remove('active');$('world').style.display='none';document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');if(id==='levels')renderLevels();if(id==='shop')renderShop();if(id==='custom')renderLooks();gameActive=false;syncStats()}
+function syncStats(){$('coinCount').textContent=coins;$('levelCount').textContent=level;$('inLevel').textContent=level;$('inCoins').textContent=coins}
+function closeModal(){$('modalLayer').classList.remove('active')}
+function modal(html){$('modalContent').innerHTML=html;$('modalLayer').classList.add('active')}
+function showHow(){modal(`<div class="bigemoji">🎮🌈</div><h2>How to play</h2><p>Move with the ◀ ▶ buttons and jump with ⬆. Grab shiny coins, then reach the star question box.</p><p>Each level has a fun question at the beginning AND at the end.</p><button class="yellow" onclick="closeModal()">Got it! 💗</button>`)}
+function beginLevel(n){level=Math.min(8,Math.max(1,n));syncStats();openScreen('home');document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('world').style.display='block';$('gameUI').classList.add('active');gameActive=true;paused=false;questionStage='start';questionAnswered=false;player={x:45,y:220,vy:0,onGround:false};platforms=[{x:0,y:window.innerHeight*.72,w:window.innerWidth*.23},{x:window.innerWidth*.29,y:window.innerHeight*.61,w:window.innerWidth*.17},{x:window.innerWidth*.52,y:window.innerHeight*.51,w:window.innerWidth*.17},{x:window.innerWidth*.73,y:window.innerHeight*.62,w:window.innerWidth*.3}];collected=[];drawWorld();askQuestion('start');cancelAnimationFrame(raf);tick()}
+function askQuestion(stage){gameActive=false;questionStage=stage;questionAnswered=false;let q=qs[(level-1+(stage==='end'?3:0))%qs.length];let label=stage==='start'?'Ready, set, learn!':'Level complete! One last question!';modal(`<div class="bigemoji">${q.emoji} ⭐</div><h2>${label}</h2><p>${q.q}</p><div class="answers">${q.a.map((a,i)=>`<button class="answer" onclick="answerQuestion(${i},${q.ok},'${stage}',this)">${a}</button>`).join('')}</div><div id="feedback" class="feedback"></div><button id="questionNext" class="yellow" style="display:none" onclick="questionContinue('${stage}')">Let's go! ▶</button>`)}
+function answerQuestion(i,ok,stage,btn){if(questionAnswered)return;let fb=$('feedback');if(i===ok){questionAnswered=true;fb.textContent='Hooray! You got it! +3 coins ⭐';document.querySelectorAll('.answer').forEach(b=>b.disabled=true);btn.classList.add('good');coins+=3;syncStats();$('questionNext').style.display='inline-block'}else{btn.classList.add('bad');fb.textContent='Good try! Have another go 💗'}}
+function questionContinue(stage){closeModal();if(stage==='start'){gameActive=true;paused=false}else{maxLevel=Math.max(maxLevel,Math.min(8,level+1));modal(`<div class="bigemoji">🎉🌈💖</div><h2>Level complete!</h2><p>You did amazing, Esther! Ready for another adventure?</p><button class="yellow" onclick="nextLevel()">NEXT LEVEL ▶</button><button class="white" onclick="openScreen('levels')">SELECT LEVEL</button><button class="pink" onclick="openScreen('home')">MENU</button>`)}}
+function nextLevel(){closeModal();if(level<8)beginLevel(level+1);else modal(`<div class="bigemoji">🏆🌈</div><h2>You did it!</h2><p>You finished every level. You're a superstar!</p><button class="yellow" onclick="openScreen('levels')">Play again</button><button class="white" onclick="openScreen('home')">Menu</button>`)}
+function openPause(){if(!gameActive&&!paused)return;paused=true;gameActive=false;modal(`<div class="bigemoji">⏸️</div><h2>Adventure paused</h2><button class="green" onclick="closeModal();paused=false;gameActive=true">Keep playing ▶</button><p><button class="white" onclick="openScreen('levels')">Select level</button> <button class="pink" onclick="exitGame()">✕ Exit game</button></p>`)}
+function exitGame(){gameActive=false;paused=false;closeModal();$('gameUI').classList.remove('active');$('world').style.display='none';openScreen('home')}
+function renderLevels(){$('levelButtons').innerHTML='';for(let i=1;i<=8;i++){let b=document.createElement('button');b.className='levelbtn'+(i===level?' current':'');b.innerHTML=`<span style="font-size:28px">${i<=maxLevel?'🌴':'🔒'}</span><br>Level ${i}`;b.disabled=i>maxLevel;b.onclick=()=>beginLevel(i);$('levelButtons').appendChild(b)}}
+const styles=['🐾','🎀','🌼','🕶️','👑','🌈'];function renderLooks(){$('looks').innerHTML='';styles.forEach(s=>{let b=document.createElement('button');b.className='levelbtn';b.textContent=s+' '+(owned.has(s)?'✓':'🪙 4');b.onclick=()=>{if(owned.has(s)){accessory=s;$('customPup').textContent='🐶'+s}else if(coins>=4){coins-=4;owned.add(s);accessory=s;$('customPup').textContent='🐶'+s;syncStats();renderLooks()}else toast('Collect a few more coins first! 🪙')};$('looks').appendChild(b)})}
+function saveLook(){toast('Your look is saved! 💖');openScreen('home')}
+function renderShop(){$('shopItems').innerHTML='';styles.slice(1).forEach(s=>{let b=document.createElement('button');b.className='levelbtn';b.innerHTML=`<span style="font-size:27px">${s}</span><br>${owned.has(s)?'Owned ✓':'Unlock · 4 🪙'}`;b.onclick=()=>{if(owned.has(s)){accessory=s;toast('Accessory selected! ✨')}else if(coins>=4){coins-=4;owned.add(s);accessory=s;syncStats();renderShop();toast('New accessory unlocked! 🌈')}else toast('Find coins by playing! 🪙')};$('shopItems').appendChild(b)})}
+function openCode(){modal(`<div class="bigemoji">🎁💖</div><h2>Parent bonus code</h2><p>Ask a parent to enter the family code for 500 pretend coins.</p><input id="parentCode" inputmode="numeric" maxlength="4" placeholder="Enter code" style="font-size:24px;text-align:center;padding:12px;border:3px solid #b8e5ff;border-radius:12px;width:90%;margin:8px"><p class="note">No payments or card details — this only adds game coins.</p><button class="green" onclick="redeemCode()">Unlock coins</button> <button class="white" onclick="closeModal()">Cancel</button>`)}
+let bonusUsed=false;function redeemCode(){if($('parentCode').value==='0919'){if(!bonusUsed){coins+=500;bonusUsed=true;syncStats()}modal(`<div class="bigemoji">💖🌈🐶</div><h2>Thank you! Love you!</h2><p>Bonus coins are ready! Have the happiest time playing, Esther! ✨</p><button class="yellow" onclick="closeModal();openScreen('shop')">Yay! 💗</button>`)}else toast('Ask your parent to check the code 💗')}
+function openWordDrop(){wordRound=(wordRound+1)%qs.length;let q=qs[wordRound];modal(`<div class="bigemoji">🔤💫</div><h2>Word Drop!</h2><p>Tap the word that matches the picture: <span style="font-size:35px;display:block">${['☀️','🐱','🍎','🐶','🌙','⭐','🐟','🌼'][wordRound]}</span></p><div class="word-choices">${[['SUN','FUN','RUN'],['CAT','HAT','BAT'],['APPLE','TABLE','PURPLE'],['DOG','LOG','FOG'],['MOON','SPOON','NOON'],['STAR','CAR','JAR'],['FISH','DISH','WISH'],['FLOWER','POWER','TOWER']][wordRound].map((w,i)=>`<button class="answer" onclick="wordAnswer(${i},${[0,0,0,0,0,0,0,0][wordRound]},this)">${w}</button>`).join('')}</div><div id="wordFeedback" class="feedback"></div><button class="white" onclick="openScreen('home')">Back to menu</button>`)}
+function wordAnswer(i,ok,b){if(b.dataset.done)return;if(i===ok){b.dataset.done='1';$('wordFeedback').textContent='Brilliant word spotting! +2 coins';coins+=2;syncStats()}else $('wordFeedback').textContent='Try another word! 💗'}
+function toast(t){let old=$('toast');if(!old){old=document.createElement('div');old.id='toast';old.style.cssText='position:absolute;z-index:40;bottom:20px;left:50%;transform:translateX(-50%);background:#174778;color:white;border:3px solid white;border-radius:15px;padding:12px;font-weight:900';$('app').appendChild(old)}old.textContent=t;old.style.display='block';setTimeout(()=>old.style.display='none',1700)}
+function drawWorld(){let c=$('world'),dpr=Math.min(window.devicePixelRatio||1,2);c.width=Math.floor(innerWidth*dpr);c.height=Math.floor(innerHeight*dpr);let ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);let w=innerWidth,h=innerHeight;let g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#64d5ff');g.addColorStop(.7,'#d3f8ff');g.addColorStop(.7,'#a8ed87');g.addColorStop(1,'#70d66a');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.fillStyle='#fff';[[w*.12,h*.16],[w*.45,h*.11],[w*.77,h*.18]].forEach(([x,y])=>{ctx.beginPath();ctx.ellipse(x,y,42,14,0,0,7);ctx.ellipse(x+20,y-7,25,23,0,0,7);ctx.ellipse(x+47,y,35,13,0,0,7);ctx.fill()});platforms.forEach(p=>{ctx.fillStyle='#ad7149';ctx.fillRect(p.x,p.y,p.w,h-p.y);ctx.fillStyle='#5cdb5b';ctx.fillRect(p.x,p.y,p.w,12);for(let x=p.x+7;x<p.x+p.w;x+=22){ctx.fillStyle='#8df17c';ctx.beginPath();ctx.arc(x,p.y+2,5,0,7);ctx.fill()}});for(let i=0;i<5;i++){let x=130+i*w*.16,y=h*(.58-(i%2)*.09);if(!collected.includes(i)){ctx.fillStyle='#ffc72b';ctx.beginPath();ctx.arc(x,y,13,0,7);ctx.fill();ctx.strokeStyle='#fff28b';ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 15px sans-serif';ctx.fillText('★',x-6,y+5)}}ctx.fillStyle='#ffd9ef';ctx.fillRect(w*.86,h*.50,42,42);ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.strokeRect(w*.86,h*.50,42,42);ctx.fillStyle='#8755dd';ctx.font='bold 30px sans-serif';ctx.fillText('?',w*.86+13,h*.50+31);ctx.font='clamp(35px,7vh,64px) sans-serif';ctx.fillText('🐶'+accessory,player.x,player.y);ctx.font='bold 15px sans-serif';ctx.fillStyle='#174778';ctx.fillText('Reach the star question box!',20,h*.18)}
+function tick(){if(!gameActive)return;frame++;let h=innerHeight,w=innerWidth;player.x+=keys.right?4:0;player.x-=keys.left?4:0;player.x=Math.max(0,Math.min(w-70,player.x));player.vy+=.55;player.y+=player.vy;player.onGround=false;for(let p of platforms){if(player.x+36>p.x&&player.x<p.x+p.w&&player.y+18>=p.y&&player.y+18<=p.y+20&&player.vy>=0){player.y=p.y-18;player.vy=0;player.onGround=true}}if(player.y>h){player.y=h*.35;player.vy=0}for(let i=0;i<5;i++){let x=130+i*w*.16,y=h*(.58-(i%2)*.09);if(!collected.includes(i)&&Math.abs(player.x-x)<35&&Math.abs(player.y-y)<65){collected.push(i);coins++;syncStats();toast('+1 shiny coin! 🪙')}}if(player.x>w*.80&&questionStage==='start'){gameActive=false;askQuestion('end');return}drawWorld();raf=requestAnimationFrame(tick)}
+function jump(){if(gameActive&&(player.onGround||player.y>innerHeight*.65)){player.vy=-11;player.onGround=false}}
+document.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight',' ','ArrowUp','a','d','A','D','w','W'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')keys.left=true;if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')keys.right=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w'||e.key==='W')jump();if(e.key==='Escape')openPause()});
+document.addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))keys.left=false;if(['ArrowRight','d','D'].includes(e.key))keys.right=false});
+function bindHold(id,k){let el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>keys[k]=false))}
+bindHold('leftBtn','left');bindHold('rightBtn','right');$('jumpBtn').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
+window.addEventListener('resize',()=>{if(gameActive){platforms=[{x:0,y:innerHeight*.72,w:innerWidth*.23},{x:innerWidth*.29,y:innerHeight*.61,w:innerWidth*.17},{x:innerWidth*.52,y:innerHeight*.51,w:innerWidth*.17},{x:innerWidth*.73,y:innerHeight*.62,w:innerWidth*.3}];drawWorld()}});
+renderLevels();renderLooks();renderShop();syncStats();drawWorld();
+setTimeout(()=>{$('loading').style.opacity='0';setTimeout(()=>$('loading').style.display='none',500)},1800);
+</script>
+</body></html>
